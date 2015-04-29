@@ -1,4 +1,5 @@
 <h1>Movies</h1>
-<div ng-repeat="m in movies">
-    <a ng-href="#/movies/{{m.$id}}">{{m.name}}</a>
-</div>
+<a href="#/movies/new">Add movie</a>
+<ul ng-repeat="m in movies">
+    <li><a ng-href="#/movies/{{m.$id}}">{{m.name}}</a></li>
+</ul>

@@ -1,15 +1,15 @@
 <form name="f">
 Name<br>
-<input type="text" ng-model="name" required><br>
+<input type="text" ng-model="m.name" required><br>
 Director<br>
-<input type="text" ng-model="director" required><br>
+<input type="text" ng-model="m.director" required><br>
 Year<br>
-<input type="text" name="year" ng-model="year" ng-pattern="/^\d+$/" required>
+<input type="text" name="year" ng-model="m.year" ng-pattern="/^\d+$/" required>
 <div ng-show="f.year.$invalid && f.year.$dirty">
     Must be integer.
 </div><br>
 Description<br>
-<input type="text" ng-model="description" required><br>
+<input type="text" ng-model="m.description" required><br>
 All fields required
-<button ng-click="addMovie()" ng-disabled="f.$invalid">Add Movie</button>
+<button ng-click="formAction()" ng-disabled="f.$invalid">{{action}}</button>
 </form>

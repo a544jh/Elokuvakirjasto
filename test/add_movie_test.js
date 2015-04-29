@@ -51,12 +51,14 @@ describe('Add movie', function(){
   	* toBeCalled-oletusta.
 	*/
 	it('should be able to add a movie by its name, director, release date and description', function(){
-            scope.name = 'asd';
-            scope.director = 'asd';
-            scope.year = '2015';
-            scope.description = 'asd';
+            movie = {};
+            movie.name = 'asd';
+            movie.director = 'asd';
+            movie.year = '2015';
+            movie.description = 'asd';
+            scope.m = movie;
             
-            scope.addMovie();
+            scope.formAction();
             
             expect(FirebaseServiceMock.getMovies().length).toBe(2);
             expect(FirebaseServiceMock.addMovie).toHaveBeenCalled();
@@ -69,12 +71,14 @@ describe('Add movie', function(){
 	* not.toBeCalled-oletusta (muista not-negaatio!).
 	*/
 	it('should not be able to add a movie if its name, director, release date or description is empty', function(){
-            scope.name = 'asd';
-            scope.director = 'asd';
-            scope.year = '2015';
-            scope.description = '';
+            movie = {};
+            movie.name = 'asd';
+            movie.director = 'asd';
+            movie.year = '2015';
+            movie.description = '';
+            scope.m = movie;
             
-            scope.addMovie();
+            scope.formAction();
             
             expect(FirebaseServiceMock.getMovies().length).toBe(1);
             expect(FirebaseServiceMock.addMovie).not.toHaveBeenCalled();

@@ -6,6 +6,10 @@ Elokuvakirjasto.config(function ($routeProvider) {
         controller: 'ListController',
         templateUrl: 'app/views/list.html'
     })
+            .when('/movies', {
+                controller: 'ListController',
+                templateUrl: 'app/views/list.html'
+            })
             .when('/movies/new', {
                 controller: 'NewMovieController',
                 templateUrl: 'app/views/movie_form.html'
@@ -13,6 +17,10 @@ Elokuvakirjasto.config(function ($routeProvider) {
             .when('/movies/:id', {
                 controller: 'ShowMovieController',
                 templateUrl: 'app/views/show.html'
+            })
+            .when('/movies/:id/edit', {
+                controller: 'EditMovieController',
+                templateUrl: 'app/views/movie_form.html'
             });
     // Lisää reitit tänne
 });
@@ -37,6 +45,14 @@ Elokuvakirjasto.service('FirebaseService', function ($firebase) {
         });
     };
 
+    this.removeMovie = function (movie) {
+        movies.$remove(movie);
+    };
+
+    this.editMovie = function (movie) {
+        movies.$save(movie);
+    };
+
 });
 
 Elokuvakirjasto.controller('ListController', function ($scope, FirebaseService) {
@@ -44,26 +60,47 @@ Elokuvakirjasto.controller('ListController', function ($scope, FirebaseService) 
 });
 
 Elokuvakirjasto.controller('NewMovieController', function ($scope, $location, FirebaseService) {
-    $scope.addMovie = function () {
-        var movie = {
-            name: $scope.name,
-            director: $scope.director,
-            year: $scope.year,
-            description: $scope.description
-        };
+    $scope.action = "Add movie";
+
+    $scope.formAction = function () {
+        var movie = $scope.m;
+        debugger;
         for (var f in movie) {
-            console.log(movie[f]);
             if (movie[f] === '') {
                 return;
             }
         }
         FirebaseService.addMovie(movie);
-        $location.path('/');
+        $location.path('/movies');
     };
 });
 
-Elokuvakirjasto.controller('ShowMovieController', function ($scope, $routeParams, FirebaseService) {
+Elokuvakirjasto.controller('ShowMovieController', function ($scope, $routeParams, $location, FirebaseService) {
     FirebaseService.getObject($routeParams.id, function (data) {
         $scope.m = data;
     });
+
+    $scope.removeMovie = function () {
+        FirebaseService.removeMovie($scope.m);
+        $location.path('/movies');
+    };
+
+    $scope.editMovie = function () {
+        $location.path('/movies/' + $scope.m.$id + '/edit');
+    };
+
+});
+
+Elokuvakirjasto.controller('EditMovieController', function ($scope, FirebaseService, $routeParams, $location) {
+    FirebaseService.getObject($routeParams.id, function (data) {
+        $scope.m = data;
+    });
+
+    $scope.action = "Edit movie";
+
+    $scope.formAction = function () {
+        FirebaseService.editMovie($scope.m);
+        $location.path('/movies/' + $scope.m.$id);
+    }
+
 });
