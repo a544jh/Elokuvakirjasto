@@ -4,9 +4,17 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ElokuvakirjastoMuutos</title>
+        <title>Elokuvakirjasto</title>
     </head>
     <body ng-app="Elokuvakirjasto">
+        <div ng-if="userLoggedIn">
+            Logged is as {{userLoggedIn.password.email}}
+            <button ng-click="logOut()">Log out</button>
+        </div>
+        <div ng-if="!userLoggedIn">
+            <a href="#/login">Login</a>
+        </div>
+
         <div ng-view></div>
 
         <!-- Hyödyllisiä kirjastoja -->

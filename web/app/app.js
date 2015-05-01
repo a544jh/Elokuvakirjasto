@@ -6,14 +6,25 @@ Elokuvakirjasto.config(function ($routeProvider) {
         controller: 'ListController',
         templateUrl: 'app/views/list.html'
     })
+            .when('/login', {
+                controller: 'UserController',
+                templateUrl: 'app/views/login.html'
+            })
+            .when('/register', {
+                controller: 'UserController',
+                templateUrl: 'app/views/register.html'
+            })
             .when('/movies', {
                 controller: 'ListController',
                 templateUrl: 'app/views/list.html'
             })
             .when('/movies/new', {
                 controller: 'NewMovieController',
-                templateUrl: 'app/views/movie_form.html'
-            })
+                templateUrl: 'app/views/movie_form.html',
+                resolve: {
+                    currentAuth: function (AuthenticationService) {
+                        return AuthenticationService.checkLoggedIn();
+                    }}})
             .when('/movies/search', {
                 controller: 'SearchController',
                 templateUrl: 'app/views/search.html'})
@@ -23,9 +34,11 @@ Elokuvakirjasto.config(function ($routeProvider) {
             })
             .when('/movies/:id/edit', {
                 controller: 'EditMovieController',
-                templateUrl: 'app/views/movie_form.html'
-            });
-    // Lisää reitit tänne
+                templateUrl: 'app/views/movie_form.html',
+                resolve: {
+                    currentAuth: function (AuthenticationService) {
+                        return AuthenticationService.checkLoggedIn();
+                    }}});
 });
 
 Elokuvakirjasto.config(['$httpProvider', function ($httpProvider) {
@@ -67,6 +80,69 @@ Elokuvakirjasto.service('APIService', function ($http) {
         return $http.get('http://www.omdbapi.com', {params: {s: name, y: year}});
     };
 });
+Elokuvakirjasto.service('AuthenticationService', function ($firebase, $firebaseAuth) {
+    var firebaseRef = new Firebase('https://glaring-torch-4805.firebaseio.com/movies');
+    var firebaseAuth = $firebaseAuth(firebaseRef);
+    this.logUserIn = function (email, password) {
+        return firebaseAuth.$authWithPassword({
+            email: email,
+            password: password
+        });
+    };
+
+    this.createUser = function (email, password) {
+        return firebaseAuth.$createUser({
+            email: email,
+            password: password
+        });
+    };
+    this.checkLoggedIn = function () {
+        return firebaseAuth.$waitForAuth();
+    }
+
+    this.logUserOut = function () {
+        firebaseAuth.$unauth();
+    };
+
+    this.getUserLoggedIn = function () {
+        return firebaseAuth.$getAuth();
+    }
+});
+
+Elokuvakirjasto.controller('UserController', function ($scope, $location, AuthenticationService, $rootScope) {
+
+    $scope.logIn = function () {
+        AuthenticationService.logUserIn($scope.email, $scope.password)
+                .then(function () {
+                    $rootScope.userLoggedIn = AuthenticationService.getUserLoggedIn();
+                    $location.path('/movies');
+                })
+                .catch(function () {
+                    $scope.message = 'Wrong username or password!'
+                });
+    };
+    $scope.register = function () {
+        AuthenticationService.createUser($scope.newEmail, $scope.newPassword)
+                .then(function () {
+                    AuthenticationService.logUserIn($scope.newEmail, $scope.newPassword)
+                            .then(function () {
+                                $location.path('/movies');
+                            });
+                })
+                .catch(function () {
+                    $scope.message = 'Error! try again!';
+                });
+    };
+});
+
+Elokuvakirjasto.run(function (AuthenticationService, $rootScope) {
+    $rootScope.logOut = function () {
+        AuthenticationService.logUserOut();
+        $rootScope.userLoggedIn = AuthenticationService.getUserLoggedIn();
+    };
+
+    $rootScope.userLoggedIn = AuthenticationService.getUserLoggedIn();
+});
 
 isValid = function (movie) {
     for (var f in movie) {
@@ -81,7 +157,11 @@ Elokuvakirjasto.controller('ListController', function ($scope, FirebaseService) 
     $scope.movies = FirebaseService.getMovies();
 });
 
-Elokuvakirjasto.controller('NewMovieController', function ($scope, $location, FirebaseService) {
+Elokuvakirjasto.controller('NewMovieController', function ($scope, $location, FirebaseService, currentAuth) {
+    if (!currentAuth) {
+        $location.path('/login');
+    }
+
     $scope.action = "Add movie";
 
     $scope.formAction = function () {
@@ -110,7 +190,11 @@ Elokuvakirjasto.controller('ShowMovieController', function ($scope, $routeParams
 
 });
 
-Elokuvakirjasto.controller('EditMovieController', function ($scope, FirebaseService, $routeParams, $location) {
+Elokuvakirjasto.controller('EditMovieController', function ($scope, FirebaseService, $routeParams, $location, currentAuth) {
+    if (!currentAuth) {
+        $location.path('/login');
+    }
+
     $scope.m = {};
     FirebaseService.getObject($routeParams.id, function (data) {
         $scope.m = data;
@@ -134,11 +218,11 @@ Elokuvakirjasto.controller('SearchController', function ($scope, APIService) {
             $scope.movies = movies.Search;
             if (!$scope.movies) {
                 $scope.message = 'No movies found.';
-            } else if ($scope.movies.length === 1){
+            } else if ($scope.movies.length === 1) {
                 $scope.message = '1 movie found';
             } else {
                 $scope.message = $scope.movies.length + ' movies found';
             }
-        });  
+        });
     };
 });

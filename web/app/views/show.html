@@ -4,7 +4,9 @@
     <li>Year: {{m.year}}</li>
 </ul>
 <p>{{m.description}}</p>
-<button ng-click="editMovie()">Edit</button>
-<button ng-click="removeMovie()">Delete</button>
+<div ng-if="userLoggedIn">
+    <button ng-click="editMovie()">Edit</button>
+    <button ng-click="removeMovie()">Delete</button>
+</div>
 <br>
 <a href="#/movies">Back to list</a>
