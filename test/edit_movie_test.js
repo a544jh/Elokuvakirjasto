@@ -1,3 +1,26 @@
+if (!Array.prototype.find) {
+    Array.prototype.find = function (predicate) {
+        if (this == null) {
+            throw new TypeError('Array.prototype.find called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return value;
+            }
+        }
+        return undefined;
+    };
+}
+
 describe('Edit movie', function () {
     var controller, scope;
 
@@ -13,7 +36,15 @@ describe('Edit movie', function () {
                     name: 'The term binary file - a documentary',
                     director: 'Axel',
                     year: '2015',
-                    description: 'Trying to find out where the term binary file came from'
+                    description: 'Trying to find out where the term binary file came from',
+                    id: 'BINARY!'
+                },
+                {
+                    name: 'Joku leffa',
+                    director: 'Kalle Ilves',
+                    year: 2015,
+                    description: 'Mahtava leffa!',
+                    id: 'abc123'
                 }
             ];
             return {
@@ -24,42 +55,32 @@ describe('Edit movie', function () {
                     return movies;
                 },
                 editMovie: function (movie) {
-                    // Etsitään muokattava viesti mockin taulukosti
-                    movieToEdit = movie.find(function (m) {
-                        return m.name = movie.name;
+                    movieToEdit = movies.find(function (m) {
+                        return m.id === movie.id;
                     });
                     if (movieToEdit) {
-                        // Muokataan viestiä
-                        movieToEdit.name = movie.name;
+                        movieToEdit = movie;
                     }
                 },
                 removeMovie: function (movie) {
                     // Valitaan kaikki viestit, paitsi poistettava viesti
                     movie = movie.filter(function (m) {
-                        m.name != movie.name
+                        m.name != movie.name;
                     });
                 },
                 getObject: function (key, done) {
-                    if (key == 'abc123') {
-                        done({
-                            name: 'Joku leffa',
-                            director: 'Kalle Ilves',
-                            release: 2015,
-                            description: 'Mahtava leffa!'
-                        });
-                    } else {
-                        done(null);
-                    }
+                    var copy = JSON.parse(JSON.stringify(movies.find(function (m) {
+                        return m.id === key;
+                    })));
+                    done(copy);
                 }
             };
         })();
 
-        RouteParamsMock = (function () {
-            return {
-                // Toteuta mockattu $routeParams-muuttuja tähän
-                id: 'abc123'
-            }
-        });
+        RouteParamsMock = {
+            // Toteuta mockattu $routeParams-muuttuja tähän
+            id: 'abc123'
+        };
 
         // Lisää vakoilijat
         spyOn(FirebaseServiceMock, 'editMovie').and.callThrough();
@@ -87,10 +108,8 @@ describe('Edit movie', function () {
      * käyttämällä toBeCalled-oletusta.
      */
     it('should fill the edit form with the current information about the movie', function () {
-       expect(FirebaseServiceMock.getObject).toHaveBeenCalled();
-       var movie = scope.m;
-       debugger;
-       expect(movie.name).toBe('Joku leffa');
+        expect(FirebaseServiceMock.getObject).toHaveBeenCalled();
+        expect(scope.m.name).toBe('Joku leffa');
     });
 
     /* 
@@ -99,7 +118,15 @@ describe('Edit movie', function () {
      * käyttämällä toBeCalled-oletusta.
      */
     it('should be able to edit a movie by its name, director, release date and description', function () {
-        expect(true).toBe(false);
+        expect(FirebaseServiceMock.getObject).toHaveBeenCalled();
+        scope.m.name = 'Joku toinen leffa';
+        scope.formAction();
+        expect(FirebaseServiceMock.editMovie).toHaveBeenCalled();
+//        var movie;
+//        FirebaseServiceMock.getObject('abc123', function (data) {
+//            movie = data;
+//        });
+//        expect(movie.name).toBe('Joku toinen leffa');
     });
 
     /*
@@ -108,6 +135,15 @@ describe('Edit movie', function () {
      * käyttämällä not.toBeCalled-oletusta.
      */
     it('should not be able to edit a movie if its name, director, release date or description is empty', function () {
-        expect(true).toBe(false);
+        expect(FirebaseServiceMock.getObject).toHaveBeenCalled();
+        scope.m.name = '';
+        scope.formAction();
+        expect(FirebaseServiceMock.editMovie).not.toHaveBeenCalled();
+        //fuck this
+//        var movie;
+//        FirebaseServiceMock.getObject('abc123', function (data) {
+//            movie = data;
+//        });
+//        expect(movie.name).toBe('Joku leffa');
     });
 });

@@ -55,6 +55,15 @@ Elokuvakirjasto.service('FirebaseService', function ($firebase) {
 
 });
 
+isValid = function (movie) {
+    for (var f in movie) {
+        if (movie[f] === '') {
+            return false;
+        }
+    }
+    return true;
+};
+
 Elokuvakirjasto.controller('ListController', function ($scope, FirebaseService) {
     $scope.movies = FirebaseService.getMovies();
 });
@@ -64,11 +73,8 @@ Elokuvakirjasto.controller('NewMovieController', function ($scope, $location, Fi
 
     $scope.formAction = function () {
         var movie = $scope.m;
-        debugger;
-        for (var f in movie) {
-            if (movie[f] === '') {
-                return;
-            }
+        if (!isValid(movie)) {
+            return;
         }
         FirebaseService.addMovie(movie);
         $location.path('/movies');
@@ -92,15 +98,19 @@ Elokuvakirjasto.controller('ShowMovieController', function ($scope, $routeParams
 });
 
 Elokuvakirjasto.controller('EditMovieController', function ($scope, FirebaseService, $routeParams, $location) {
+    $scope.m = {};
     FirebaseService.getObject($routeParams.id, function (data) {
         $scope.m = data;
     });
 
     $scope.action = "Edit movie";
-
     $scope.formAction = function () {
+        var movie = $scope.m;
+        if (!isValid(movie)) {
+            return;
+        }
         FirebaseService.editMovie($scope.m);
         $location.path('/movies/' + $scope.m.$id);
-    }
+    };
 
 });
