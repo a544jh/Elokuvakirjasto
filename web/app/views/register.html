@@ -1,8 +1,8 @@
-<div id="registerform">
+<div id="registerform" class="form-inline">
     <h1>Register</h1>
-    Email <input type="text" ng-model="newEmail">
-    Password <input type="password" ng-model="newPassword">
-    <button ng-click="register()">Register</button>
+    <label>Email</label> <input type="text" ng-model="newEmail" class="form-control">
+    <label>Password</label> <input type="password" ng-model="newPassword" class="form-control">
+    <button ng-click="register()" class="btn btn-default">Register</button>
 </div>
 
 {{message}}

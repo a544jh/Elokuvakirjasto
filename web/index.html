@@ -4,16 +4,29 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="bootstrap-3.3.2-dist/css/bootstrap.min.css">
+
         <title>Elokuvakirjasto</title>
     </head>
     <body ng-app="Elokuvakirjasto">
-        <div ng-if="userLoggedIn">
-            Logged is as {{userLoggedIn.password.email}}
-            <button ng-click="logOut()">Log out</button>
-        </div>
-        <div ng-if="!userLoggedIn">
-            <a href="#/login">Login</a>
-        </div>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+
+                <a class="navbar-brand" href="#/movies">Movies</a>
+                <ul class="nav navbar-nav navbar-left">
+                    <li><a href="#/movies/new">Add movie</a></li>
+                    <li><a href="#/movies/search">OMDb API search</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <form ng-if="userLoggedIn" class="navbar-form">
+                        Logged is as {{userLoggedIn.password.email}}
+                        <button ng-click="logOut()" class="btn btn-default">Log out</button>
+                    </form>
+                    <li ng-if="!userLoggedIn"><a href="#/login">Login</a></li>
+
+                </ul>
+            </div>
+        </nav>
 
         <div ng-view></div>
 
@@ -24,6 +37,10 @@
         <script src="bower_components/angularfire/dist/angularfire.min.js"></script>
 
         <!-- Linkitä omat tiedostosi tähän (huomaa, että polun juuri on web-kansio!) -->
-        <script src="app/app.js"></script>    
+        <script src="app/app.js"></script>
+        <!-- jQuery -->
+        <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+        <!-- Bootstrap -->
+        <script src="bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
     </body>
 </html>

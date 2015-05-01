@@ -1,6 +1,15 @@
 <h1>Movies</h1>
-<a href="#/movies/new">Add movie</a>
-<a href="#/movies/search">OMDb API search</a>
-<ul ng-repeat="m in movies">
-    <li><a ng-href="#/movies/{{m.$id}}">{{m.name}}</a></li>
-</ul>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Director</th>
+            <th>Year</th>
+        </tr>
+    </thead>
+    <tr ng-repeat="m in movies">
+        <td><a ng-href="#/movies/{{m.$id}}">{{m.name}}</a></td>
+        <td>{{m.director}}</td>
+        <td>{{m.year}}</td>
+    </tr>
+</table>
