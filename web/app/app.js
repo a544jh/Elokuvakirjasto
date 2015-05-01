@@ -14,6 +14,9 @@ Elokuvakirjasto.config(function ($routeProvider) {
                 controller: 'NewMovieController',
                 templateUrl: 'app/views/movie_form.html'
             })
+            .when('/movies/search', {
+                controller: 'SearchController',
+                templateUrl: 'app/views/search.html'})
             .when('/movies/:id', {
                 controller: 'ShowMovieController',
                 templateUrl: 'app/views/show.html'
@@ -24,6 +27,10 @@ Elokuvakirjasto.config(function ($routeProvider) {
             });
     // Lisää reitit tänne
 });
+
+Elokuvakirjasto.config(['$httpProvider', function ($httpProvider) {
+        delete $httpProvider.defaults.headers.common["X-Requested-With"];
+    }]);
 
 Elokuvakirjasto.service('FirebaseService', function ($firebase) {
     // Keskustele Firebasen kanssa tämän palvelun avulla
@@ -53,6 +60,12 @@ Elokuvakirjasto.service('FirebaseService', function ($firebase) {
         movies.$save(movie);
     };
 
+});
+
+Elokuvakirjasto.service('APIService', function ($http) {
+    this.findMovie = function (name, year) {
+        return $http.get('http://www.omdbapi.com', {params: {s: name, y: year}});
+    };
 });
 
 isValid = function (movie) {
@@ -113,4 +126,19 @@ Elokuvakirjasto.controller('EditMovieController', function ($scope, FirebaseServ
         $location.path('/movies/' + $scope.m.$id);
     };
 
+});
+
+Elokuvakirjasto.controller('SearchController', function ($scope, APIService) {
+    $scope.search = function () {
+        APIService.findMovie($scope.name, $scope.year).success(function (movies) {
+            $scope.movies = movies.Search;
+            if (!$scope.movies) {
+                $scope.message = 'No movies found.';
+            } else if ($scope.movies.length === 1){
+                $scope.message = '1 movie found';
+            } else {
+                $scope.message = $scope.movies.length + ' movies found';
+            }
+        });  
+    };
 });

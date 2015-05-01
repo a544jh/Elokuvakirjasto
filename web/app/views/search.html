@@ -1,0 +1,8 @@
+<h1>Search movies</h1>
+<input type="text" ng-model="name" placeholder="Name">
+<input type="text" ng-model="year" placeholder="Year">
+<button ng-click="search()">Search</button>
+<ul ng-repeat="m in movies">
+    <li><a ng-href="http://www.imdb.com/title/{{m.imdbID}}">{{m.Title}} ({{m.Year}})</a></li>
+</ul>
+<p>{{message}}</p>
